@@ -4,6 +4,6 @@
       "src"
     ],
     "ext": "ts,js,json",
-    "exec": "ts-node src/core/server.ts"
+    "exec": "ts-node src/index.ts"
   }
   
