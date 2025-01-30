@@ -25,7 +25,7 @@ role,
 
    
     const emailTemplatePath = path.join(process.cwd(), "src", "templates", "emailTemplate.html");
-    const time = `New request at ${new Date().toLocaleString()}`;
+    const time = ` Request at ${new Date().toLocaleString()}`;
 
 
     // Replace placeholders with actual values
@@ -45,7 +45,7 @@ role,
         html: emailHTML,
         
       })
-      .then((e) => console.log(e))
+      .then((e) => {})
       .catch((e) => res.status(403).json({ ...e }));
 
     res.status(200).json({ success: "Request Submit Data" });
