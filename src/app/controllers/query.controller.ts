@@ -97,7 +97,7 @@ export const searchRequests = async (req: Request, res: Response) => {
     } = req.query;
 
     // Build search query
-    console.log(req.query, "query");
+    
     const searchQuery: any = {};
 
     if (by == "fullName") {

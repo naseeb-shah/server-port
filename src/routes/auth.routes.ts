@@ -10,5 +10,5 @@ import { authenticate } from "../middleware/auth.middleware";
 const router = express.Router();
 router.post("/send-otp",sendOtp)
 router.post("/verify-otp",verifyOTP)
-router.post("/create-user",authenticate,createProfile)
+router.post("/create-user",createProfile)
 export default router;
