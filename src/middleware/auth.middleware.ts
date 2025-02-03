@@ -1,22 +1,27 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET as string;
+export const authenticate = (req: Request, res: Response, next: NextFunction) => {
+  // Get the token from the Authorization header
+  const token = req.header("Authorization")?.replace("Bearer ", "");
 
-export const authenticateToken = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const token = req.header("Authorization")?.split(" ")[1];
-
-  if (!token) return res.status(401).json({ message: "Access denied" });
+  if (!token) {
+    res.status(401).json({ message: "Access denied. No token provided." });
+    res.end()
+    return
+  }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    (req as any).user = decoded;
+    // Verify the token
+    const decoded = jwt.verify(token,"deen shah here") as { userId: string; email: string };
+
+    // Attach the decoded user information to the request object
+    req.user = decoded;
+
+    // Proceed to the next middleware or route handler
     next();
-  } catch (err) {
-    res.status(400).json({ message: "Invalid token" });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ message: "Invalid token." });
   }
 };

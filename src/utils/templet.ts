@@ -17,7 +17,7 @@ interface EmailReplacements {
  * @param replacements - Object containing placeholder values
  * @returns - Processed HTML string
  */
- export const  loadEmailTemplate = (filePath: string, replacements: EmailReplacements): string => {
+ export const  loadEmailTemplate = (filePath: string, replacements:any): string => {
   let template = fs.readFileSync(filePath, 'utf-8');
   
   Object.keys(replacements).forEach((key) => {

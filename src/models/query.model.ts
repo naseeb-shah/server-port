@@ -9,6 +9,8 @@ export interface IRequest extends Document {
   organization:string;
   createdAt?: Date;
   updatedAt?: Date;
+  status:"New"|"Close"|"Progress"
+  share:string[]
 }
 
 const RequestSchema = new Schema<IRequest>(
@@ -18,7 +20,10 @@ const RequestSchema = new Schema<IRequest>(
     organization:{type:String,required:true},
     message: { type: String ,required:true},
     role: { type: String ,required:true},
-    
+    status:{type:String,default:"New"},
+    share:{
+      type:[String] ,default:[]
+    }
   },
   { timestamps: true } // Enable timestamps
 );

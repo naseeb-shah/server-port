@@ -7,6 +7,7 @@ import connectDB from "../src/config/database";
 import authRoutes from "../src/routes/auth.routes";
 import emailRoutes from "../src/routes/email.routes";
 import queryRoutes  from "../src/routes/req.routes"
+import { authenticate } from "./middleware/auth.middleware";
 
 dotenv.config();
 const app = express();
@@ -21,7 +22,7 @@ app.use(express.json());
 
 app.use("/auth", authRoutes);
 app.use("/email", emailRoutes);
-app.use("/add", queryRoutes);
+app.use("/request", queryRoutes);
 app.get("/",(req,res)=>{
     res.status(200).json({message:"Server is runing"})
 })
