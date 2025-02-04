@@ -6,7 +6,8 @@ export interface IUser extends Document {
   password?: string;
   googleId?: string;
   otp?: string; // Store the OTP
-  otpExpires?: Date; // Store the OTP expiration time
+  otpExpires?: Date;
+  active:boolean // Store the OTP expiration time
 }
 
 const UserSchema = new Schema<IUser>({
@@ -15,7 +16,8 @@ const UserSchema = new Schema<IUser>({
   password: { type: String },
   googleId: { type: String },
   otp: { type: String }, // OTP field
-  otpExpires: { type: Date }, // OTP expiration field
+  otpExpires: { type: Date },
+  active:{type:Boolean,default:false} // OTP expiration field
 });
 
 export default mongoose.model<IUser>("User", UserSchema);

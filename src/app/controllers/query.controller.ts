@@ -7,24 +7,24 @@ import { AnyArray } from "mongoose";
 import * as XLSX from "xlsx";
 const fs = require("fs");
 
-
-export const changeStatus=async(req:Request,res:Response)=>{
-   try {
-    
-    
-  const update  =  await Query.updateOne({_id:req?.params?.id},{
-    $set:{
-      status:req.params.status
-    }
-  })
-  res.status(200).json({ success: "Request UPdate  Data" });
-   } catch (error:any) {
+export const changeStatus = async (req: Request, res: Response) => {
+  try {
+    const update = await Query.updateOne(
+      { _id: req?.params?.id },
+      {
+        $set: {
+          status: req.params.status,
+        },
+      }
+    );
+    res.status(200).json({ success: "Request UPdate  Data" });
+  } catch (error: any) {
     res.status(500).json({
       e: "Server Error",
       error,
     });
-   }
-}
+  }
+};
 
 export const addRequest = async (req: Request, res: Response) => {
   try {
@@ -97,7 +97,7 @@ export const searchRequests = async (req: Request, res: Response) => {
     } = req.query;
 
     // Build search query
-    
+
     const searchQuery: any = {};
 
     if (by == "fullName") {
@@ -136,7 +136,7 @@ export const searchRequests = async (req: Request, res: Response) => {
     const limitNumber = Number(limit);
 
     // Find the requests with pagination
-    console.log("search query", searchQuery);
+
     const requests = await Query.find(searchQuery)
       .skip(skip)
       .limit(limitNumber);
@@ -169,6 +169,7 @@ export const shareRequests = async (
 ): Promise<void> => {
   try {
     const { emails, id } = req.body;
+    
 
     let request: any = await Query.findById(id);
 
@@ -199,6 +200,7 @@ export const shareRequests = async (
       role,
     });
     let from = `${organization} <${workEmail}>`;
+    let emailFailed=false
     const info = await transporter
       .sendMail({
         from: from,
@@ -207,8 +209,16 @@ export const shareRequests = async (
         html: emailHTML,
       })
       .then((e) => {})
-      .catch((e) => res.status(403).json({ ...e }));
+      .catch((e) =>{
 
+
+
+       emailFailed=true
+      } );
+if(emailFailed){
+  res.status(403).json({ success: "Unable to send emails" });
+  return
+}
     res.status(200).json({ success: "Request Submit Data" });
   } catch (e: any) {
     res.status(500).json({ error: "Server Error", message: e?.message });
@@ -232,7 +242,7 @@ export const downloadRequests = async (req: Request, res: Response) => {
     } = req.query;
 
     // Build search query
-    console.log(req.query, "query");
+
     const searchQuery: any = {};
 
     if (by == "fullName") {
@@ -271,7 +281,7 @@ export const downloadRequests = async (req: Request, res: Response) => {
     const limitNumber = Number(limit);
 
     // Find the requests with pagination
-    
+
     const requests = await Query.find(searchQuery);
     const excelData: any = [
       [
@@ -343,7 +353,7 @@ export const downloadRequestsView = async (req: Request, res: Response) => {
     } = req.query;
 
     // Build search query
-    
+
     const searchQuery: any = {};
 
     if (by == "fullName") {
@@ -377,22 +387,14 @@ export const downloadRequestsView = async (req: Request, res: Response) => {
       };
     }
 
-  
-
     // Find the requests with pagination
-    
+
     const requests = await Query.find(searchQuery);
     res.status(200).json({
       success: true,
-      data: requests
-      
+      data: requests,
     });
-  
   } catch (e: any) {
     res.status(500).json({ error: "Server Error", message: e?.message });
   }
 };
-
-
-
-

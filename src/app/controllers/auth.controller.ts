@@ -15,19 +15,26 @@ export const sendOtp = async (req: Request, res: Response): Promise<void> => {
     const user = await User.findOne({ email });
     if (!user) {
       res.status(404).json({ message: "User not found" });
+      return;
+    }
+     if (!user.active) {
+      res.status(404).json({ message: "User not verified." });
       return
     }
-
     // Generate OTP
     const otp = generateOTP();
     const otpExpires = new Date(Date.now() + 2 * 60 * 1000); // OTP expires in 2 minutes
- const emailTemplatePath = path.join(process.cwd(), "src", "templates", "otpTemplate.html");
+    const emailTemplatePath = path.join(
+      process.cwd(),
+      "src",
+      "templates",
+      "otpTemplate.html"
+    );
     const time = ` Request at ${new Date().toLocaleString()}`;
-
 
     // Replace placeholders with actual values
     const emailHTML = loadEmailTemplate(emailTemplatePath, {
-     otp
+      otp,
     });
 
     // Save OTP and expiration time in the user model
@@ -44,12 +51,12 @@ export const sendOtp = async (req: Request, res: Response): Promise<void> => {
       from,
       to: email,
       subject: "Your OTP for Verification",
-      html:emailHTML
+      html: emailHTML,
     };
 
     await transporter.sendMail(mailOptions);
 
-    res.status(200).json({ message: "OTP sent successfully" });
+    res.status(200).json({ message: "OTP sent successfully. Check your email." });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Failed to send OTP" });
@@ -103,10 +110,102 @@ export const createProfile = async (
 ): Promise<void> => {
   try {
     const { email } = req.body;
-    const user = await User.create({ email });
-    res.status(200).json({ user });
+    const otp = generateOTP();
+
+    const otpExpires = new Date(Date.now() + 2 * 60 * 1000);
+    let user = await User.findOne({email}) 
+    if(!user){
+      user = await User.create({ email, otp, otpExpires });
+
+    }else{
+      user.otp=otp
+      user.otpExpires=otpExpires
+      await user.save()
+    }
+    const emailTemplatePath = path.join(
+      process.cwd(),
+      "src",
+      "templates",
+      "otpTemplate.html"
+    );
+    const time = ` Request at ${new Date().toLocaleString()}`;
+
+    // Replace placeholders with actual values
+    const emailHTML = loadEmailTemplate(emailTemplatePath, {
+      otp,
+    });
+    let from = `OTP  <${"PortfolioIQ Dashboard"}>`;
+    const mailOptions = {
+      from,
+      to: email,
+      subject: "Your OTP for New User",
+      html: emailHTML,
+    };
+
+    await transporter.sendMail(mailOptions).then((response) => {
+      if (response?.accepted?.includes(email)) {
+        res.status(200).json({ massage: "Otp Send Successfully. Please Check you email." });
+      } else {
+        res.status(405).json({
+          massage: "Please use valid email.",
+        });
+      }
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Failed to creteUser" });
   }
 };
+
+export const verifyOTPCreateUser = async (req: Request, res: Response) => {
+  const { email, otp } = req.body;
+
+  try {
+    // Find the user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      res.status(403).json({ message: "User not found" });
+      return;
+    }
+    if (user) {
+      if (
+        user.otp === otp &&
+        user?.otpExpires &&
+        user.otpExpires > new Date()
+      ) {
+        // Clear OTP and expiration time after successful verification
+        user.otp = undefined;
+        user.otpExpires = undefined;
+        user.active = true;
+        await user.save();
+
+        // Send the token in the response
+        res.status(200).json({ message: "User Registered  successfully" });
+      } else {
+        res.status(400).json({ message: "Invalid or expired OTP" });
+      }
+    }
+    // Check if OTP matches and is not expired
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to verify OTP" });
+  }
+};
+
+
+export const getAllUser=async(req:Request,res:Response)=>{
+
+try {
+  
+
+  const users= await User.find({}).lean()
+  res.status(200).json(users)
+
+
+} catch (error) {
+  console.error(error);
+  res.status(500).json({ message: "Failed to get user Data." });
+}
+
+}
+
