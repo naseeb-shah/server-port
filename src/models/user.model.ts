@@ -17,7 +17,7 @@ const UserSchema = new Schema<IUser>({
   googleId: { type: String },
   otp: { type: String }, // OTP field
   otpExpires: { type: Date },
-  active:{type:Boolean,default:false} // OTP expiration field
+  active:{type:Boolean,default:true} // OTP expiration field
 });
 
 export default mongoose.model<IUser>("User", UserSchema);
